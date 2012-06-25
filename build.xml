@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+
+<project name="mtp" default="jar" basedir=".">
+  <property name="src" value="src"/>
+  <property name="build" value="build"/>
+  <property name="dist" value="dist"/>	
+  <property name="lib" value="lib"/>
+  <property name="icons" value="icons"/>
+  <property name="i18n" value="i18n"/>
+  <property name="testFiles" value="testFiles"/>
+  <property name="build.compiler" value="jikes"/>
+
+  <path id="libs">
+		<pathelement location="${lib}/junit.jar"/>
+  </path>
+
+  <target name="init">
+     <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directory structure -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${dist}"/>
+  </target>   
+
+	<target name="clean">
+		<delete dir="${build}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac classpathref="libs" srcdir="${src}" destdir="${build}"/>
+	</target>
+	
+  <target name="unit_tests" depends="init">
+		<junit printsummary="on" fork="yes" showoutput="yes">
+			<classpath>
+		    <pathelement location="${build}" />
+			</classpath>
+
+			<test name="com.mtp.AllTests"/>
+		</junit>
+	</target>
+
+	<target name="acceptance_tests" depends="init">
+		<junit printsummary="on" fork="yes" showoutput="yes">
+			<classpath>
+		    <pathelement location="${build}" />
+			</classpath>
+
+			<test name="accpt.PounderAcceptanceTests"/>
+		</junit>
+	</target>
+
+	<target name="docs">
+		<delete dir="docs/api"/>
+
+		<javadoc destdir="docs/api" author="true" version="true" Use="true" windowtitle="Pounder Javadoc">
+			<packageset dir="${src}" defaultexcludes="yes">
+				<include name="com/**"/>
+				<exclude name="accpt/**"/>
+				<exclude name="converter/**"/>
+				<exclude name="junit/**"/>
+			</packageset>
+
+			<doctitle><![CDATA[<h1>Pounder Docs</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright &#169; 2002 Matthew Pekar. All Rights Reserved.</i>]]></bottom>
+			<link href="http://java.sun.com/j2se/1.4/docs/api/"/>
+			<link href="http://www.junit.org/junit/javadoc/3.7/"/>
+		</javadoc>
+	</target>
+
+	<target name="i18n">
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="en_US.txt"/>
+			<arg line="StringsBundle.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="fr_FR.txt"/>
+			<arg line="StringsBundle_fr_FR.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="de_DE.txt"/>
+			<arg line="StringsBundle_de_DE.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="ko_KR.txt"/>
+			<arg line="StringsBundle_ko_KR.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="es_ES.txt"/>
+			<arg line="StringsBundle_es_ES.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="el_GR.txt"/>
+			<arg line="StringsBundle_el_GR.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="pt_PT.txt"/>
+			<arg line="StringsBundle_pt_PT.properties"/>
+		</exec>
+
+		<exec dir="${i18n}" executable="native2ascii">
+			<arg line="-encoding Unicode"/>
+			<arg line="ja_JP.txt"/>
+			<arg line="StringsBundle_ja_JP.properties"/>
+		</exec>
+	</target>
+
+	<target name="jar" depends="clean, compile, i18n">
+		<delete file="${dist}/pounder.jar"/>
+		<jar index="yes" destfile="${dist}/pounder.jar" manifest="META-INF/manifest.mf">
+			<fileset dir="${icons}/" includesfile="${icons}/icons.lst"/>
+			<fileset dir="${i18n}/">
+				<exclude name="**/*.txt"/>
+				<exclude name="**/default.properties"/>
+			</fileset>
+			<fileset dir="${build}/">
+				<exclude name="**/*Test*"/>
+				<exclude name="**/*PackageTests*"/>
+				<exclude name="**/*AllTests*"/>
+				<exclude name="accpt/**"/>
+				<exclude name="junit/**"/>
+				<exclude name="converter/**"/>
+			</fileset>
+			<fileset dir="${build}" includes="com/mtp/pounder/*Testing*"/>
+			<fileset dir="${build}" includes="com/mtp/pounder/TestInstanceFactory.class"/>
+		</jar>
+	</target>
+
+  <target name="zipSrc">
+    <zip destfile="src.zip">
+      <zipfileset dir="${src}/" prefix="src" includes="**/*.java"/>
+      <zipfileset dir="${testFiles}/" prefix="testFiles"/>
+      <zipfileset dir="${icons}/" prefix="icons"/>
+      <zipfileset dir="${i18n}/" prefix="i18n"/>
+      <zipfileset dir="Meta-inf/" prefix="Meta-inf"/>
+      <zipfileset dir="." includes="build.xml,ru.bat,ra.bat,license.txt"/>
+    </zip>
+  </target>
+
+	<target name="dist_pounder" depends="jar, docs"/>
+
+</project>
